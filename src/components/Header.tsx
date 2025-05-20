@@ -8,10 +8,11 @@ interface HeaderProps {
 
 const Header = ({ toggleSidebar }: HeaderProps) => {
   return (
-    <header className="border-b bg-white flex items-center h-14 px-4">
+    <header className="border-b bg-white flex items-center h-14 px-4 sticky top-0 z-10">
       <button 
         onClick={toggleSidebar}
         className="mr-4 text-gray-500 hover:bg-gray-100 p-2 rounded-full"
+        aria-label="Toggle sidebar"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path 
@@ -42,7 +43,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             <span className="text-sm font-medium">Weather Forecast</span>
             <span className="text-xs text-gray-500">com.weather.liveweather.storm</span>
           </div>
-          <div className="bg-blue-500 w-8 h-8 rounded-md flex items-center justify-center text-white font-medium">
+          <div className="bg-[#4285f4] w-8 h-8 rounded-md flex items-center justify-center text-white font-medium">
             26°
           </div>
         </div>

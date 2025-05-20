@@ -11,21 +11,24 @@ interface SidebarItem {
   name: string;
   path: string;
   icon: React.ReactNode;
+  subItems?: { name: string; path: string }[];
 }
 
 const Sidebar = ({ collapsed }: SidebarProps) => {
   const location = useLocation();
+  const currentPath = location.pathname;
 
+  // Define sidebar items with their icons and sub-items
   const sidebarItems: SidebarItem[] = [
     {
       name: "Dashboard",
       path: "/dashboard",
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M4 4H8V8H4V4ZM10 4H14V8H10V4ZM16 4H20V8H16V4ZM4 10H8V14H4V10ZM10 10H14V14H10V10ZM16 10H20V14H16V10ZM4 16H8V20H4V16ZM10 16H14V20H10V16ZM16 16H20V20H16V16Z"
-            fill="currentColor"
-          />
+          <rect x="4" y="4" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
+          <rect x="4" y="14" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
+          <rect x="14" y="4" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
+          <rect x="14" y="14" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
         </svg>
       ),
     },
@@ -57,7 +60,14 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
-            d="M4 19H20M4 14H20M4 9H20M4 4H12"
+            d="M13 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V11"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M9.5 11.5L11 13L15.5 8.5"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
@@ -72,14 +82,14 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
-            d="M8 2L2 8L8 14M16 2L22 8L16 14M7 8H17"
+            d="M12 15L12 17M12 7L12 13"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
-            d="M12 14V22"
+            d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
@@ -87,6 +97,15 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
           />
         </svg>
       ),
+      subItems: [
+        { name: "Latest releases", path: "/latest-releases" },
+        { name: "Production", path: "/production" },
+        { name: "Testing", path: "/testing" },
+        { name: "Pre-registration", path: "/pre-registration" },
+        { name: "App integrity", path: "/app-integrity" },
+        { name: "App bundle explorer", path: "/app-bundle-explorer" },
+        { name: "Setup", path: "/setup" },
+      ]
     },
     {
       name: "Monitor and improve",
@@ -117,6 +136,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
           />
         </svg>
       ),
+      subItems: [
+        { name: "Store presence", path: "/store-presence" },
+        { name: "Store performance", path: "/store-performance" },
+        { name: "Deep links", path: "/deep-links" },
+      ]
     },
     {
       name: "Monetize with Play",
@@ -135,35 +159,44 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     },
   ];
 
+  // Function to check if a parent or any of its children are active
+  const isPathActive = (path: string) => {
+    return currentPath === path || currentPath.startsWith(`${path}/`);
+  };
+
+  // Function to determine if we should show sub-items
+  const shouldShowSubItems = (item: SidebarItem) => {
+    return !collapsed && item.subItems && isPathActive(item.path);
+  };
+
   return (
     <aside
       className={cn(
-        "border-r bg-white transition-all duration-300 overflow-hidden",
+        "border-r bg-[#f8f9fa] transition-all duration-300 overflow-hidden h-[calc(100vh-3.5rem)]",
         collapsed ? "w-16" : "w-64"
       )}
     >
       <div className="p-4 border-b">
         <NavLink
           to="/all-apps"
-          className="flex items-center text-gray-600 hover:bg-gray-100 rounded-md p-2"
+          className="flex items-center text-[#5f6368] hover:bg-gray-100 rounded-md p-2"
         >
           <ChevronLeft size={16} />
           {!collapsed && <span className="ml-2 text-sm">All apps</span>}
         </NavLink>
       </div>
 
-      <nav className="p-2">
-        <ul className="space-y-1">
+      <nav className="overflow-y-auto h-full">
+        <ul className="py-2">
           {sidebarItems.map((item) => (
-            <li key={item.name}>
+            <li key={item.name} className="px-2">
               <NavLink
                 to={item.path}
                 className={({ isActive }) => cn(
-                  "flex items-center p-2 rounded-md",
-                  isActive
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-100",
-                  collapsed ? "justify-center" : ""
+                  "flex items-center py-3 px-4 rounded-md",
+                  isActive || isPathActive(item.path)
+                    ? "bg-[#e8f0fe] text-[#1a73e8]"
+                    : "text-[#5f6368] hover:bg-gray-100",
                 )}
               >
                 <span className="flex-shrink-0">{item.icon}</span>
@@ -171,6 +204,26 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
                   <span className="ml-3 text-sm font-medium">{item.name}</span>
                 )}
               </NavLink>
+              
+              {shouldShowSubItems(item) && (
+                <ul className="ml-10 mt-1">
+                  {item.subItems?.map((subItem) => (
+                    <li key={subItem.name}>
+                      <NavLink
+                        to={subItem.path}
+                        className={({ isActive }) => cn(
+                          "block py-2 px-4 text-sm rounded-md",
+                          isActive
+                            ? "bg-[#e8f0fe] text-[#1a73e8]"
+                            : "text-[#5f6368] hover:bg-gray-100",
+                        )}
+                      >
+                        {subItem.name}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ul>
