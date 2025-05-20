@@ -1,35 +1,22 @@
 
 import { NavLink, useLocation } from "react-router-dom";
-import { ChevronLeft, ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 interface SidebarProps {
   collapsed: boolean;
-}
-
-interface SubItem {
-  name: string;
-  path: string;
 }
 
 interface SidebarItem {
   name: string;
   path: string;
   icon: React.ReactNode;
-  subItems?: SubItem[];
+  subItems?: { name: string; path: string }[];
 }
 
 const Sidebar = ({ collapsed }: SidebarProps) => {
   const location = useLocation();
   const currentPath = location.pathname;
-
-  // Track expanded state for items with subitems
-  const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({
-    '/test-and-release': true,
-    '/testing': false,
-    '/setup': false,
-  });
 
   // Define sidebar items with their icons and sub-items
   const sidebarItems: SidebarItem[] = [
@@ -38,10 +25,10 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
       path: "/dashboard",
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-          <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-          <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-          <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
+          <rect x="4" y="4" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
+          <rect x="4" y="14" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
+          <rect x="14" y="4" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
+          <rect x="14" y="14" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="2" />
         </svg>
       ),
     },
@@ -117,8 +104,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
         { name: "Pre-registration", path: "/pre-registration" },
         { name: "App integrity", path: "/app-integrity" },
         { name: "App bundle explorer", path: "/app-bundle-explorer" },
-        { name: "App signing", path: "/app-signing" },
-        { name: "Advanced settings", path: "/advanced-settings" },
+        { name: "Setup", path: "/setup" },
       ]
     },
     {
@@ -173,25 +159,14 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     },
   ];
 
-  // Function to check if a path is active
+  // Function to check if a parent or any of its children are active
   const isPathActive = (path: string) => {
-    return currentPath === path || 
-           currentPath.startsWith(`${path}/`) || 
-           (path !== "/dashboard" && currentPath.includes(path));
-  };
-  
-  // Function to toggle subitems visibility
-  const toggleSubItems = (path: string) => {
-    if (collapsed) return;
-    setExpandedItems(prev => ({
-      ...prev,
-      [path]: !prev[path]
-    }));
+    return currentPath === path || currentPath.startsWith(`${path}/`);
   };
 
   // Function to determine if we should show sub-items
   const shouldShowSubItems = (item: SidebarItem) => {
-    return !collapsed && item.subItems && (expandedItems[item.path] || isPathActive(item.path));
+    return !collapsed && item.subItems && isPathActive(item.path);
   };
 
   return (
@@ -201,7 +176,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
         collapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="p-3 border-b">
+      <div className="p-4 border-b">
         <NavLink
           to="/all-apps"
           className="flex items-center text-[#5f6368] hover:bg-gray-100 rounded-md p-2"
@@ -214,66 +189,41 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
       <nav className="overflow-y-auto h-full">
         <ul className="py-2">
           {sidebarItems.map((item) => (
-            <li key={item.name} className="px-2 mb-1">
-              <div className="flex flex-col">
-                <div 
-                  className={cn(
-                    "flex items-center py-2 px-3 rounded-md cursor-pointer",
-                    isPathActive(item.path)
-                      ? "bg-[#e8f0fe] text-[#1a73e8]"
-                      : "text-[#5f6368] hover:bg-gray-100",
-                  )}
-                  onClick={() => {
-                    if (item.subItems?.length) {
-                      toggleSubItems(item.path);
-                    }
-                  }}
-                >
-                  <span className="flex-shrink-0">{item.icon}</span>
-                  
-                  {!collapsed && (
-                    <>
-                      <span className="ml-3 text-sm font-medium flex-1">{item.name}</span>
-                      
-                      {item.subItems?.length && (
-                        <button 
-                          className="p-1 rounded-full hover:bg-gray-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSubItems(item.path);
-                          }}
-                        >
-                          {expandedItems[item.path] ? (
-                            <ChevronDown size={16} />
-                          ) : (
-                            <ChevronRight size={16} />
-                          )}
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
-                
-                {shouldShowSubItems(item) && (
-                  <ul className="ml-8 mt-1 space-y-1">
-                    {item.subItems?.map((subItem) => (
-                      <li key={subItem.name}>
-                        <NavLink
-                          to={subItem.path}
-                          className={({ isActive }) => cn(
-                            "block py-1.5 px-2 text-sm rounded-md",
-                            isActive
-                              ? "bg-[#e8f0fe] text-[#1a73e8]"
-                              : "text-[#5f6368] hover:bg-gray-100",
-                          )}
-                        >
-                          {subItem.name}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </ul>
+            <li key={item.name} className="px-2">
+              <NavLink
+                to={item.path}
+                className={({ isActive }) => cn(
+                  "flex items-center py-3 px-4 rounded-md",
+                  isActive || isPathActive(item.path)
+                    ? "bg-[#e8f0fe] text-[#1a73e8]"
+                    : "text-[#5f6368] hover:bg-gray-100",
                 )}
-              </div>
+              >
+                <span className="flex-shrink-0">{item.icon}</span>
+                {!collapsed && (
+                  <span className="ml-3 text-sm font-medium">{item.name}</span>
+                )}
+              </NavLink>
+              
+              {shouldShowSubItems(item) && (
+                <ul className="ml-10 mt-1">
+                  {item.subItems?.map((subItem) => (
+                    <li key={subItem.name}>
+                      <NavLink
+                        to={subItem.path}
+                        className={({ isActive }) => cn(
+                          "block py-2 px-4 text-sm rounded-md",
+                          isActive
+                            ? "bg-[#e8f0fe] text-[#1a73e8]"
+                            : "text-[#5f6368] hover:bg-gray-100",
+                        )}
+                      >
+                        {subItem.name}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ul>

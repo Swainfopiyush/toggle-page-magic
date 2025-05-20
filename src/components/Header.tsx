@@ -1,7 +1,6 @@
 
 import { Bell } from "lucide-react";
 import GooglePlayLogo from "./GooglePlayLogo";
-import { Link } from "react-router-dom";
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -26,17 +25,17 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
         </svg>
       </button>
       
-      <Link to="/dashboard" className="flex items-center">
+      <div className="flex items-center">
         <GooglePlayLogo />
         <span className="ml-2 text-xl font-medium text-[#5f6368]">Console</span>
-      </Link>
+      </div>
       
       <div className="flex-1"></div>
       
-      <div className="flex items-center gap-2">
-        <button className="flex items-center gap-1 rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">
-          <Bell size={18} />
-          <span>Notifications</span>
+      <div className="flex items-center gap-4">
+        <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full">
+          <Bell size={20} />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
         </button>
         
         <div className="flex items-center gap-2">
